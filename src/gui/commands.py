@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+import threading
 from src.algorithms.report import JSONReportBuilder, ReportDirector
 
 
@@ -17,19 +18,21 @@ class RunAlgorithmCommand(Command):
         self.tick_callback = tick_callback
 
     def execute(self):
+        # Виносимо всю важку роботу в окремий фоновий потік!
+        thread = threading.Thread(target=self._run_in_background, daemon=True)
+        thread.start()
+
+    def _run_in_background(self):
+        # Цей код працює у фоні і не блокує Tkinter
         result = self.facade.run_algorithm(self.algo_name, self.data_type, self.tick_callback)
 
-        # --- Реалізація Патерну Builder (Збереження у файл) ---
         director = ReportDirector()
         builder = JSONReportBuilder()
         director.builder = builder
 
-        # Директор покроково формує звіт з отриманих даних
         director.make_report(result)
         report = builder.get_report()
-
-        # Зберігаємо файл у корінь проєкту
         report.save_to_file("results.json")
-        # -----------------------------------------------------
 
+        # Передаємо результат назад (через безпечну чергу в app.py)
         self.ui_callback(result)

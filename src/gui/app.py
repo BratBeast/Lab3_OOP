@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 import time
+import queue
 from src.algorithms.facade import AlgorithmFacade
 from src.gui.commands import RunAlgorithmCommand
 from src.gui.memento import Caretaker
@@ -9,9 +10,12 @@ from src.gui.memento import Caretaker
 class AlgorithmVisualizerApp:
     def __init__(self, root, facade: AlgorithmFacade):
         self.root = root
-        self.root.title("Algorithm Visualizer & Benchmarker")
+        self.root.title("Algorithm Visualizer & Benchmarker (Multi-Threaded)")
         self.facade = facade
         self.caretaker = Caretaker()
+
+        # Черга для безпечного обміну даними між фоновим потоком і GUI
+        self.gui_queue = queue.Queue()
 
         self._setup_ui()
 
@@ -21,14 +25,14 @@ class AlgorithmVisualizerApp:
 
         ttk.Label(control_frame, text="Алгоритм:").pack(side=tk.LEFT, padx=5)
         self.algo_var = tk.StringVar()
-        self.algo_cb = ttk.Combobox(control_frame, textvariable=self.algo_var, state="readonly")
+        self.algo_cb = ttk.Combobox(control_frame, textvariable=self.algo_var, state="readonly", width=15)
         self.algo_cb['values'] = self.facade.get_available_algorithms()
         if self.algo_cb['values']: self.algo_cb.current(0)
         self.algo_cb.pack(side=tk.LEFT, padx=5)
 
         ttk.Label(control_frame, text="Дані:").pack(side=tk.LEFT, padx=5)
         self.data_var = tk.StringVar()
-        self.data_cb = ttk.Combobox(control_frame, textvariable=self.data_var, state="readonly")
+        self.data_cb = ttk.Combobox(control_frame, textvariable=self.data_var, state="readonly", width=10)
         self.data_cb['values'] = self.facade.get_available_data_types()
         if self.data_cb['values']: self.data_cb.current(0)
         self.data_cb.pack(side=tk.LEFT, padx=5)
@@ -37,6 +41,13 @@ class AlgorithmVisualizerApp:
         self.size_var = tk.IntVar(value=self.facade.settings.array_size)
         self.size_spin = ttk.Spinbox(control_frame, from_=5, to=500, textvariable=self.size_var, width=5)
         self.size_spin.pack(side=tk.LEFT, padx=5)
+
+        # Новий елемент - вибір кількості потоків
+        ttk.Label(control_frame, text="Потоки:").pack(side=tk.LEFT, padx=5)
+        self.threads_var = tk.StringVar(value=str(self.facade.settings.thread_count))
+        self.threads_cb = ttk.Combobox(control_frame, textvariable=self.threads_var, values=["1", "2", "4", "8", "16"],
+                                       state="readonly", width=3)
+        self.threads_cb.pack(side=tk.LEFT, padx=5)
 
         self.run_btn = ttk.Button(control_frame, text="Відсортувати", command=self._on_run)
         self.run_btn.pack(side=tk.LEFT, padx=10)
@@ -56,7 +67,7 @@ class AlgorithmVisualizerApp:
         c_height = self.canvas.winfo_height() or 400
 
         bar_width = c_width / len(data)
-        max_val = max(data)
+        max_val = max(data) if max(data) > 0 else 1
 
         for i, val in enumerate(data):
             x0 = i * bar_width
@@ -68,31 +79,63 @@ class AlgorithmVisualizerApp:
     def _on_run(self):
         try:
             self.facade.settings.update_size(int(self.size_var.get()))
+            self.facade.settings.update_threads(int(self.threads_var.get()))
         except ValueError:
-            messagebox.showerror("Помилка", "Введіть ціле число!")
+            messagebox.showerror("Помилка", "Введіть коректні числа!")
             return
 
         self.run_btn.config(state=tk.DISABLED)
 
+        # Тепер ми не малюємо тут! Ми кидаємо стан масиву у потокобезпечну чергу
         def tick(current_data):
-            self._draw_array(current_data, color="orange")
-            self.root.update()
+            self.gui_queue.put(("tick", current_data.copy()))
             time.sleep(self.facade.settings.animation_speed / 50)
+
+        # Коли сортування завершено, кидаємо результат у чергу
+        def on_finish(result):
+            self.gui_queue.put(("done", result))
 
         cmd = RunAlgorithmCommand(
             facade=self.facade,
             algo_name=self.algo_var.get(),
             data_type=self.data_var.get(),
-            ui_callback=self._handle_result,
+            ui_callback=on_finish,
             tick_callback=tick
         )
-        cmd.execute()
+
+        cmd.execute()  # Це моментально запустить фоновий потік
+        self._poll_queue()  # Починаємо слухати чергу в головному потоці
+
+    def _poll_queue(self):
+        latest_tick = None
+        done_payload = None
+
+        try:
+            # Вигрібаємо ВСІ повідомлення з черги, щоб вона не переповнювалась
+            while True:
+                msg_type, payload = self.gui_queue.get_nowait()
+                if msg_type == "tick":
+                    latest_tick = payload
+                elif msg_type == "done":
+                    done_payload = payload
+                    break  # Якщо прийшов фініш, далі чергу не читаємо
+        except queue.Empty:
+            pass
+
+        # Відмальовуємо ТІЛЬКИ актуальний стан (скіпаємо застарілі кадри)
+        if done_payload is not None:
+            self._handle_result(done_payload)
+            return  # Зупиняємо цикл опитування
+        elif latest_tick is not None:
+            self._draw_array(latest_tick, color="orange")
+
+        # Плануємо наступну перевірку через 20 мілісекунд
+        self.root.after(20, self._poll_queue)
 
     def _handle_result(self, result: dict):
         self.run_btn.config(state=tk.NORMAL)
         self.caretaker.backup(result["original_data"])
         self.undo_btn.config(state=tk.NORMAL)
-
         self._draw_array(result["sorted_data"], color="green")
 
     def _on_undo(self):
