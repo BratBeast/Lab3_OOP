@@ -39,6 +39,9 @@
                         <li>
                                 <a class="function" href="#SettingsManager.update_size">update_size</a>
                         </li>
+                        <li>
+                                <a class="function" href="#SettingsManager.update_threads">update_threads</a>
+                        </li>
                 </ul>
 
             </li>
@@ -73,9 +76,9 @@
 </span><span id="L-8"><a href="#L-8"><span class="linenos"> 8</span></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
 </span><span id="L-9"><a href="#L-9"><span class="linenos"> 9</span></a>        <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
 </span><span id="L-10"><a href="#L-10"><span class="linenos">10</span></a>            <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">SettingsManager</span><span class="p">,</span> <span class="bp">cls</span><span class="p">)</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
-</span><span id="L-11"><a href="#L-11"><span class="linenos">11</span></a>            <span class="c1"># Базові налаштування за замовчуванням</span>
-</span><span id="L-12"><a href="#L-12"><span class="linenos">12</span></a>            <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">animation_speed</span> <span class="o">=</span> <span class="mf">0.5</span>
-</span><span id="L-13"><a href="#L-13"><span class="linenos">13</span></a>            <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">array_size</span> <span class="o">=</span> <span class="mi">50</span>
+</span><span id="L-11"><a href="#L-11"><span class="linenos">11</span></a>            <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">animation_speed</span> <span class="o">=</span> <span class="mf">0.5</span>
+</span><span id="L-12"><a href="#L-12"><span class="linenos">12</span></a>            <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">array_size</span> <span class="o">=</span> <span class="mi">50</span>
+</span><span id="L-13"><a href="#L-13"><span class="linenos">13</span></a>            <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">thread_count</span> <span class="o">=</span> <span class="mi">4</span>
 </span><span id="L-14"><a href="#L-14"><span class="linenos">14</span></a>            <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">theme</span> <span class="o">=</span> <span class="s2">&quot;light&quot;</span>
 </span><span id="L-15"><a href="#L-15"><span class="linenos">15</span></a>        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span>
 </span><span id="L-16"><a href="#L-16"><span class="linenos">16</span></a>
@@ -84,6 +87,9 @@
 </span><span id="L-19"><a href="#L-19"><span class="linenos">19</span></a>
 </span><span id="L-20"><a href="#L-20"><span class="linenos">20</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">update_size</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 </span><span id="L-21"><a href="#L-21"><span class="linenos">21</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">array_size</span> <span class="o">=</span> <span class="n">new_size</span>
+</span><span id="L-22"><a href="#L-22"><span class="linenos">22</span></a>
+</span><span id="L-23"><a href="#L-23"><span class="linenos">23</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">update_threads</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_threads</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+</span><span id="L-24"><a href="#L-24"><span class="linenos">24</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">thread_count</span> <span class="o">=</span> <span class="n">new_threads</span>
 </span></pre></div>
 
 
@@ -109,9 +115,9 @@
 </span><span id="SettingsManager-9"><a href="#SettingsManager-9"><span class="linenos"> 9</span></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
 </span><span id="SettingsManager-10"><a href="#SettingsManager-10"><span class="linenos">10</span></a>        <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
 </span><span id="SettingsManager-11"><a href="#SettingsManager-11"><span class="linenos">11</span></a>            <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">SettingsManager</span><span class="p">,</span> <span class="bp">cls</span><span class="p">)</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
-</span><span id="SettingsManager-12"><a href="#SettingsManager-12"><span class="linenos">12</span></a>            <span class="c1"># Базові налаштування за замовчуванням</span>
-</span><span id="SettingsManager-13"><a href="#SettingsManager-13"><span class="linenos">13</span></a>            <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">animation_speed</span> <span class="o">=</span> <span class="mf">0.5</span>
-</span><span id="SettingsManager-14"><a href="#SettingsManager-14"><span class="linenos">14</span></a>            <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">array_size</span> <span class="o">=</span> <span class="mi">50</span>
+</span><span id="SettingsManager-12"><a href="#SettingsManager-12"><span class="linenos">12</span></a>            <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">animation_speed</span> <span class="o">=</span> <span class="mf">0.5</span>
+</span><span id="SettingsManager-13"><a href="#SettingsManager-13"><span class="linenos">13</span></a>            <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">array_size</span> <span class="o">=</span> <span class="mi">50</span>
+</span><span id="SettingsManager-14"><a href="#SettingsManager-14"><span class="linenos">14</span></a>            <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">thread_count</span> <span class="o">=</span> <span class="mi">4</span>
 </span><span id="SettingsManager-15"><a href="#SettingsManager-15"><span class="linenos">15</span></a>            <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">theme</span> <span class="o">=</span> <span class="s2">&quot;light&quot;</span>
 </span><span id="SettingsManager-16"><a href="#SettingsManager-16"><span class="linenos">16</span></a>        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span>
 </span><span id="SettingsManager-17"><a href="#SettingsManager-17"><span class="linenos">17</span></a>
@@ -120,6 +126,9 @@
 </span><span id="SettingsManager-20"><a href="#SettingsManager-20"><span class="linenos">20</span></a>
 </span><span id="SettingsManager-21"><a href="#SettingsManager-21"><span class="linenos">21</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">update_size</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 </span><span id="SettingsManager-22"><a href="#SettingsManager-22"><span class="linenos">22</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">array_size</span> <span class="o">=</span> <span class="n">new_size</span>
+</span><span id="SettingsManager-23"><a href="#SettingsManager-23"><span class="linenos">23</span></a>
+</span><span id="SettingsManager-24"><a href="#SettingsManager-24"><span class="linenos">24</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">update_threads</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_threads</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+</span><span id="SettingsManager-25"><a href="#SettingsManager-25"><span class="linenos">25</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">thread_count</span> <span class="o">=</span> <span class="n">new_threads</span>
 </span></pre></div>
 
 
@@ -160,6 +169,25 @@
     <a class="headerlink" href="#SettingsManager.update_size"></a>
             <div class="pdoc-code codehilite"><pre><span></span><span id="SettingsManager.update_size-21"><a href="#SettingsManager.update_size-21"><span class="linenos">21</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">update_size</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 </span><span id="SettingsManager.update_size-22"><a href="#SettingsManager.update_size-22"><span class="linenos">22</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">array_size</span> <span class="o">=</span> <span class="n">new_size</span>
+</span></pre></div>
+
+
+    
+
+                            </div>
+                            <div id="SettingsManager.update_threads" class="classattr">
+                                        <input id="SettingsManager.update_threads-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
+<div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">update_threads</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">new_threads</span><span class="p">:</span> <span class="nb">int</span></span><span class="return-annotation">):</span></span>
+
+                <label class="view-source-button" for="SettingsManager.update_threads-view-source"><span>View Source</span></label>
+
+    </div>
+    <a class="headerlink" href="#SettingsManager.update_threads"></a>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="SettingsManager.update_threads-24"><a href="#SettingsManager.update_threads-24"><span class="linenos">24</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">update_threads</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_threads</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+</span><span id="SettingsManager.update_threads-25"><a href="#SettingsManager.update_threads-25"><span class="linenos">25</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">thread_count</span> <span class="o">=</span> <span class="n">new_threads</span>
 </span></pre></div>
 
 
