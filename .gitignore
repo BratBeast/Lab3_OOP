@@ -1,0 +1,17 @@
+# .gitignore
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Віртуальне середовище
+venv/
+env/
+ENV/
+
+# Налаштування IDE
+.vscode/
+.idea/
+
+# Результати бенчмарків та локальні звіти
+results.json
+*.csv
