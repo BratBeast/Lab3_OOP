@@ -1,5 +1,5 @@
 import time
-from src.algorithms.sorting import BubbleSort, QuickSort, BuiltInSortAdapter
+from src.algorithms.sorting import BubbleSort, QuickSort, BuiltInSortAdapter, ParallelMergeSort
 from src.algorithms.factory import DataFactory
 from src.algorithms.config import SettingsManager
 
@@ -11,6 +11,7 @@ class AlgorithmFacade:
         self._algorithms = {
             "Bubble Sort": BubbleSort(),
             "Quick Sort": QuickSort(),
+            "Parallel Merge Sort": ParallelMergeSort(),  # Наш новий багатопотоковий алгоритм
             "Python Built-in (Timsort)": BuiltInSortAdapter()
         }
 
@@ -28,7 +29,6 @@ class AlgorithmFacade:
         original_data = DataFactory.create_data(data_type, size)
         strategy = self._algorithms[algo_name]
 
-        # Додаємо заміри часу для експорту
         start_time = time.perf_counter()
         sorted_data = strategy.execute(original_data, tick_callback)
         exec_time = time.perf_counter() - start_time
@@ -39,5 +39,6 @@ class AlgorithmFacade:
             "size": size,
             "original_data": original_data,
             "sorted_data": sorted_data,
-            "execution_time": exec_time
+            "execution_time": exec_time,
+            "threads_used": self.settings.thread_count if "Parallel" in algo_name else 1
         }
