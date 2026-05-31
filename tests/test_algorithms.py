@@ -4,13 +4,15 @@ import os
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from src.algorithms.sorting import BubbleSort, QuickSort, BuiltInSortAdapter
+# Додали ParallelMergeSort в імпорт
+from src.algorithms.sorting import BubbleSort, QuickSort, BuiltInSortAdapter, ParallelMergeSort
 from src.algorithms.factory import DataFactory
 
 
 class TestSortingAlgorithms(unittest.TestCase):
     def setUp(self):
-        self.algorithms = [BubbleSort(), QuickSort(), BuiltInSortAdapter()]
+        # Додали ParallelMergeSort до списку алгоритмів, які будуть тестуватись
+        self.algorithms = [BubbleSort(), QuickSort(), BuiltInSortAdapter(), ParallelMergeSort()]
 
     def test_standard_array(self):
         """Перевірка стандартного невідсортованого масиву."""
