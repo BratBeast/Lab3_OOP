@@ -62,7 +62,6 @@ class AlgorithmVisualizerApp:
         self.canvas.delete("all")
         if not data: return
 
-        self.canvas.update_idletasks()
         c_width = self.canvas.winfo_width() or 800
         c_height = self.canvas.winfo_height() or 400
 
@@ -76,6 +75,9 @@ class AlgorithmVisualizerApp:
             y1 = c_height
             self.canvas.create_rectangle(x0, y0, x1, y1, fill=color, outline="black")
 
+        # Оновлюємо екран ТІЛЬКИ коли всі стовпчики вже готові
+        self.canvas.update_idletasks()
+
     def _on_run(self):
         try:
             self.facade.settings.update_size(int(self.size_var.get()))
@@ -87,9 +89,10 @@ class AlgorithmVisualizerApp:
         self.run_btn.config(state=tk.DISABLED)
 
         # Тепер ми не малюємо тут! Ми кидаємо стан масиву у потокобезпечну чергу
+        # У методі _on_run
         def tick(current_data):
+            time.sleep(self.facade.settings.animation_speed * 0.1)
             self.gui_queue.put(("tick", current_data.copy()))
-            time.sleep(self.facade.settings.animation_speed / 50)
 
         # Коли сортування завершено, кидаємо результат у чергу
         def on_finish(result):
